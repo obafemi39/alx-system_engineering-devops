@@ -1,8 +1,29 @@
 #!/usr/bin/env bash
-# displays a list of currently running processes.
-# show all processes, for all users, including those
-# which might not have a TTY
-# Display in a user-oriented format
-# Show process hierarchy
 
-ps -auxf
+echo "=== Currently Running Processes ==="
+
+# Get the list of process IDs
+pids=$(ps -eo pid --no-headers)
+
+# Iterate through each process ID
+for pid in $pids; do
+    # Get process information
+    user=$(ps -o user= -p $pid)
+    ppid=$(ps -o ppid= -p $pid)
+    cmd=$(ps -o cmd= -p $pid)
+
+    # Get the process hierarchy
+    hierarchy=""
+    while [ "$ppid" != "1" ] && [ "$ppid" != "" ]; do
+        ppid_cmd=$(ps -o cmd= -p $ppid)
+        hierarchy="$ppid_cmd -> $hierarchy"
+        ppid=$(ps -o ppid= -p $ppid)
+    done
+
+    # Print process details
+    echo "PID: $pid"
+    echo "User: $user"
+    echo "Command: $cmd"
+    echo "Hierarchy: $hierarchy"
+    echo "-------------------------------"
+done
